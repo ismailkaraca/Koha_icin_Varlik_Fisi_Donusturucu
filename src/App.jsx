@@ -213,15 +213,13 @@ const App = () => {
                             <div>
                                 <p className="font-bold">Kullanım Bilgisi</p>
                                 <p className="text-sm">
-                                    Burada oluşturulan dosyanın "Koha Kütüphane Otomasyon Sistemi"nde nasıl kullanılacağına dair bi2lgiye,  
+                                    Burada oluşturulan dosyanın "Koha Kütüphane Otomasyon Sistemi"nde nasıl kullanılacağına dair bilgiye,  
                                     <a 
                                         href="https://drive.google.com/file/d/1-1lRqTQSUk3dcTwZsMXQi6kXK-kDdEty/view?usp=sharing" 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
                                         className="font-semibold underline hover:text-blue-900"
-                                    >
-                                        "Genel Kullanım Kılavuzu"
-                                    </a>  
+                                    >"Genel Kullanım Kılavuzu"</a>  
                                     içindeki "KBS Taşınır Kayıt ve Yönetim Sisteminden Veri Aktarma İşlemleri" başlığından ulaşabilirsiniz.
                                 </p>
                             </div>
