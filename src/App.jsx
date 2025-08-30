@@ -213,7 +213,7 @@ const App = () => {
                             <div>
                                 <p className="font-bold">Kullanım Bilgisi</p>
                                 <p className="text-sm">
-                                    Burada oluşturulan dosyanın "Koha Kütüphane Otomasyon Sistemi"nde nasıl kullanılacağına dair bilgiye,  
+                                    Burada oluşturulan dosyanın "Koha Kütüphane Otomasyon Sistemi"nde nasıl kullanılacağına dair bi2lgiye,  
                                     <a 
                                         href="https://drive.google.com/file/d/1-1lRqTQSUk3dcTwZsMXQi6kXK-kDdEty/view?usp=sharing" 
                                         target="_blank" 
@@ -363,5 +363,6 @@ const App = () => {
 };
 
 export default App;
+
 
 
