@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 
 // Bu uygulama, bir Excel dosyasını işlemek ve belirli bir şablona göre dönüştürmek için kullanılır.
 // Gerekli kütüphanelerin (React, ReactDOM, SheetJS) ortam tarafından sağlandığı varsayılmaktadır.
@@ -11,6 +11,14 @@ const App = () => {
     const [fileNamePrefix, setFileNamePrefix] = useState('');
     const [isDraggingOver, setIsDraggingOver] = useState(false); // Sürükleme durumu için state
     const [showInfo, setShowInfo] = useState(false); // Bilgilendirme panelinin görünürlüğü için state
+    const resultsRef = useRef(null); // Sonuçlar bölümüne referans
+
+    // İşlenmiş veri değiştiğinde sonuçlar bölümüne kaydır
+    useEffect(() => {
+        if (processedData.length > 0) {
+            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [processedData]);
 
     // Dosyayı state'e ayarlayan yardımcı fonksiyon
     const setFile = (file) => {
@@ -178,18 +186,18 @@ const App = () => {
         ];
         worksheet['!cols'] = columnWidths;
 
-        // Tarih formatlama
+        // Tarih formatlama (gg.aa.yyyy)
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
-        const dateString = `${year}-${day}-${month}`;
+        const dateString = `${day}.${month}.${year}`;
 
         // Dosya adı oluşturma
-        const baseName = `Koha_icin_KBSden_Tif_Aktarma_Dosyasi_${dateString}`;
+        const baseName = `TKYSden_Kohaya_Tif(Vif)_aktarma_dosyası`;
         const finalName = fileNamePrefix 
-            ? `${fileNamePrefix}_${baseName}.xlsx` 
-            : `${baseName}.xlsx`;
+            ? `${fileNamePrefix}-${baseName}-${dateString}.xlsx` 
+            : `${baseName}-${dateString}.xlsx`;
 
         window.XLSX.writeFile(workbook, finalName);
     }, [processedData, fileNamePrefix]);
@@ -300,37 +308,40 @@ const App = () => {
                     
                     {/* Adım 3: Sonuçlar ve İndirme */}
                     {processedData.length > 0 && (
-                        <div className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                        <div ref={resultsRef} className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-800">3. Adım: Sonuçları İndirin</h2>
                                     <p className="text-gray-600 mt-1">Dönüştürülen veriler aşağıda listelenmiştir. Tam listeyi Excel olarak indirebilirsiniz.</p>
                                 </div>
-                                <button
-                                    onClick={downloadExcel}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 transform hover:scale-105"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                                    </svg>
-                                    Excel Olarak İndir
-                                </button>
+
+                                {/* Sağ taraf: Girdi ve Düğme gruplandırıldı */}
+                                <div className="w-full sm:w-auto flex flex-col gap-4 items-stretch">
+                                    <div className="p-4 border-2 border-dashed rounded-lg bg-gray-50 border-blue-300">
+                                        <label htmlFor="file-prefix" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Dosya Adı Ön Eki (İsteğe Bağlı)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="file-prefix"
+                                            value={fileNamePrefix}
+                                            onChange={(e) => setFileNamePrefix(e.target.value)}
+                                            placeholder="Örn: Yetişkin Kurgu"
+                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={downloadExcel}
+                                        className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 transform hover:scale-105"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                        Excel Olarak İndir
+                                    </button>
+                                </div>
                             </div>
                              
-                            <div className="mb-6">
-                                <label htmlFor="file-prefix" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Dosya Adı Ön Eki (İsteğe Bağlı)
-                                </label>
-                                <input
-                                    type="text"
-                                    id="file-prefix"
-                                    value={fileNamePrefix}
-                                    onChange={(e) => setFileNamePrefix(e.target.value)}
-                                    placeholder="Örn: Yetişkin"
-                                    className="mt-1 block w-full sm:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-                                />
-                            </div>
-
                             <div className="overflow-x-auto rounded-lg border">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
@@ -361,7 +372,6 @@ const App = () => {
 };
 
 export default App;
-
 
 
 
