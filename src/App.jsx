@@ -13,59 +13,6 @@ const App = () => {
     const [showInfo, setShowInfo] = useState(false); // Bilgilendirme panelinin görünürlüğü için state
     const resultsRef = useRef(null); // Sonuçlar bölümüne referans
 
-    // İşlenmiş veri değiştiğinde sonuçlar bölümüne kaydır
-    useEffect(() => {
-        if (processedData.length > 0) {
-            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, [processedData]);
-
-    // Dosyayı state'e ayarlayan yardımcı fonksiyon
-    const setFile = (file) => {
-         if (file && (file.name.endsWith('.xls') || file.name.endsWith('.xlsx'))) {
-            setSourceFile(file);
-            setFileName(file.name);
-            setError('');
-        } else {
-            setError('Lütfen sadece .xls veya .xlsx formatında bir dosya seçin.');
-        }
-    };
-
-    // Dosya girişinden dosya seçimini yönetir
-    const handleFileChange = useCallback((e) => {
-        if (e.target.files && e.target.files[0]) {
-           setFile(e.target.files[0]);
-        }
-    }, []);
-    
-    // Sürükle-bırak olaylarını yöneten fonksiyonlar
-    const handleDragEnter = useCallback((e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDraggingOver(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDraggingOver(false);
-    }, []);
-
-    const handleDragOver = useCallback((e) => {
-        e.preventDefault();
-        e.stopPropagation(); // Bu, bırakma olayının tetiklenmesi için gereklidir
-    }, []);
-
-    const handleDrop = useCallback((e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDraggingOver(false);
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            setFile(e.dataTransfer.files[0]);
-            e.dataTransfer.clearData(); // Bırakılan veriyi temizle
-        }
-    }, []);
-
     // Yüklenen Excel dosyasını işler
     const processFile = useCallback(() => {
         if (!sourceFile) {
@@ -164,6 +111,66 @@ const App = () => {
         reader.readAsArrayBuffer(sourceFile);
     }, [sourceFile]);
     
+    // Yeni dosya seçildiğinde otomatik olarak işlemeyi başlat
+    useEffect(() => {
+        if (sourceFile) {
+            processFile();
+        }
+    }, [sourceFile, processFile]);
+
+    // İşlenmiş veri değiştiğinde sonuçlar bölümüne kaydır
+    useEffect(() => {
+        if (processedData.length > 0) {
+            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [processedData]);
+
+    // Dosyayı state'e ayarlayan yardımcı fonksiyon
+    const setFile = (file) => {
+         if (file && (file.name.endsWith('.xls') || file.name.endsWith('.xlsx'))) {
+            setSourceFile(file);
+            setFileName(file.name);
+            setError('');
+        } else {
+            setError('Lütfen sadece .xls veya .xlsx formatında bir dosya seçin.');
+        }
+    };
+
+    // Dosya girişinden dosya seçimini yönetir
+    const handleFileChange = useCallback((e) => {
+        if (e.target.files && e.target.files[0]) {
+           setFile(e.target.files[0]);
+        }
+    }, []);
+    
+    // Sürükle-bırak olaylarını yöneten fonksiyonlar
+    const handleDragEnter = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingOver(true);
+    }, []);
+
+    const handleDragLeave = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingOver(false);
+    }, []);
+
+    const handleDragOver = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation(); // Bu, bırakma olayının tetiklenmesi için gereklidir
+    }, []);
+
+    const handleDrop = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingOver(false);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setFile(e.dataTransfer.files[0]);
+            e.dataTransfer.clearData(); // Bırakılan veriyi temizle
+        }
+    }, []);
+    
     // İşlenmiş veriyi yeni bir Excel dosyası olarak indirmeyi yönetir
     const downloadExcel = useCallback(() => {
         if (processedData.length === 0) return;
@@ -204,16 +211,39 @@ const App = () => {
 
     // Ana bileşenin render metodu
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 font-sans">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-2 sm:py-4 font-sans">
             <div className="w-full max-w-5xl mx-auto">
-                <header className="text-center my-8">
-                    <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">Varlık İşlem Fişini Koha Kütüphane Otomasyon Sistemi'ne Giriş İçin Excel'e Dönüştürme</h1>
+                <header className="text-center my-4">
+                    <div className="flex justify-center items-center mb-4">
+                        <svg width="60" height="60" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" className="text-blue-600">
+                            {/* Left Document (Source) */}
+                            <g>
+                                <rect x="5" y="15" width="30" height="40" rx="4" ry="4" fill="none" stroke="currentColor" strokeWidth="3" />
+                                <line x1="12" y1="25" x2="28" y2="25" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                <line x1="12" y1="35" x2="28" y2="35" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                <line x1="12" y1="45" x2="20" y2="45" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                            </g>
+                            {/* Arrow */}
+                            <g>
+                                <line x1="40" y1="35" x2="60" y2="35" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                                <polyline points="52,27 60,35 52,43" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                            </g>
+                            {/* Right Document (Destination/Koha) */}
+                            <g>
+                                <rect x="65" y="15" width="30" height="40" rx="4" ry="4" fill="none" stroke="currentColor" strokeWidth="3" />
+                                <circle cx="80" cy="25" r="5" fill="none" stroke="currentColor" strokeWidth="3"/>
+                                <line x1="72" y1="38" x2="88" y2="38" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                 <line x1="72" y1="45" x2="88" y2="45" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                            </g>
+                        </svg>
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight">Varlık İşlem Fişini Koha Kütüphane Otomasyon Sistemi'ne Giriş İçin Excel'e Dönüştürme</h1>
                     <p className="mt-2 text-lg text-gray-600">Bu araç, "Varlık İşlem Fişi" dosyasını Koha sistemine uygun bir Excel formatına dönüştürür.</p>
                 </header>
 
                 <main>
                     {/* Bilgi Notu */}
-                     <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-r-lg shadow-md mb-8" role="alert">
+                     <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-r-lg shadow-md mb-6" role="alert">
                         <div className="flex">
                             <div className="py-1">
                                 <svg className="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 5v6h2V5H9zm0 8h2v-2H9v2z"/></svg>
@@ -235,7 +265,7 @@ const App = () => {
                     </div>
 
                     {/* Bilgilendirme Paneli */}
-                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 mb-8">
+                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 mb-6">
                         <button
                             onClick={() => setShowInfo(!showInfo)}
                             className="w-full text-left text-lg font-semibold text-gray-700 flex justify-between items-center transition-colors duration-300 hover:text-blue-600"
@@ -246,15 +276,11 @@ const App = () => {
                         {showInfo && (
                             <div className="mt-4 text-gray-600 space-y-4 border-t pt-4">
                                 <p>Bu uygulama TKYS'den indirilen Varlık İşlem Fişi (VİF) - [Eski adıyla TİF] dosyasının Koha'ya aktarılacak formatını otomatik oluşturmaya yaramaktadır. Ancak bu işlemin tam anlamıyla çalışabilmesi için TKYS sistemine şablon ile veya tek tek yapılan tüm veri girişlerinde, "Özel Kod/Modeli" alanına kitabın ISBN bilgisinin kesinlikle girilmesi gerekmekte, TKYS'den dışarı aktarılan dosyanın da malzemeAdi alanının sonunda ISBN verisinin (KARMA DİĞER KİTAPLAR-.MARKASIZ-Kelebek Zihinli Çocuk-9786050837933) örneğindeki gibi olması gerekmektedir. Bu bilginin eksik veya yanlış girilmesi durumunda dönüştürme işleminin işlevsiz kalacağı bilinmelidir.</p>
-                                
                                 <h3 className="text-md font-semibold text-gray-800 pt-2">KBS'den TİF Aktarım Modülü Hakkında</h3>
                                 <p>KBS'den TİF Aktar ve İçeri Aktarılan TİF'lerim modülü, KBS Programına eklenmiş ve onaylanmış materyallerin, Koha programına kontrollü olarak kaydedilmesi konusunda kolaylık sağlamak amacıyla tercihen kullanılabilecek modüldür.</p>
-                                
                                 <ul className="list-disc list-inside space-y-3">
                                     <li>KBS’den excel olarak indirilecek (TİFler) listeler, “KBS’den TİF Aktar”alanında belirtilen “İçeri Aktarılacak Excel Dosyası Düzeni”ne göre düzenlenir. KBS TİF’inde karşılığı olmayan sütunlar boş olarak muhafaza edilir.</li>
-                                     <li>
-                                        <strong className="text-yellow-600 font-semibold">NOT:</strong> “TİF sicil no” sütununun boş olması halinde işlem gerçekleşmez.
-                                    </li>
+                                    <li><strong className="text-yellow-600 font-semibold">NOT:</strong> “TİF sicil no” sütununun boş olması halinde işlem gerçekleşmez.</li>
                                 </ul>
                             </div>
                         )}
@@ -263,55 +289,50 @@ const App = () => {
                     {/* Adım 1: Dosya Yükleme */}
                     <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
                         <h2 className="text-xl font-semibold text-gray-700 mb-2">1. Adım: Dosyanızı Yükleyin</h2>
-                        <p className="text-gray-500 mb-4">Lütfen işlemek istediğiniz "Varlık İşlem Fişi.xls" veya ".xlsx" dosyasını seçin.</p>
+                        <p className="text-gray-500 mb-4">Lütfen işlemek istediğiniz "Varlık İşlem Fişi.xls" veya ".xlsx" dosyasını seçin. Dosya otomatik olarak işlenecektir.</p>
                         
                         <label 
                             htmlFor="file-upload" 
-                            className={`cursor-pointer mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors duration-300 ${isDraggingOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:bg-gray-50'}`}
-                            onDragEnter={handleDragEnter}
-                            onDragLeave={handleDragLeave}
-                            onDragOver={handleDragOver}
-                            onDrop={handleDrop}
+                            className={`cursor-pointer mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors duration-300 ${isDraggingOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:bg-gray-50'} ${isLoading ? 'cursor-wait bg-gray-50' : ''}`}
+                            onDragEnter={!isLoading ? handleDragEnter : undefined}
+                            onDragLeave={!isLoading ? handleDragLeave : undefined}
+                            onDragOver={!isLoading ? handleDragOver : undefined}
+                            onDrop={!isLoading ? handleDrop : undefined}
                         >
                             <div className="space-y-1 text-center">
-                                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                <div className="flex text-sm text-gray-600 justify-center">
-                                    <p className="pl-1">{fileName ? `Seçilen dosya: ${fileName}` : 'Dosya seçmek için tıklayın veya sürükleyip bırakın'}</p>
-                                </div>
-                                <p className="text-xs text-gray-500">XLS, XLSX formatında</p>
-                            </div>
-                        </label>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".xls,.xlsx" onChange={handleFileChange} />
-
-                        {/* Adım 2: İşlem Düğmesi */}
-                        <div className="mt-6 text-center">
-                            <button
-                                onClick={processFile}
-                                disabled={!sourceFile || isLoading}
-                                className="w-full sm:w-auto inline-flex justify-center items-center px-10 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
-                            >
                                 {isLoading ? (
                                     <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg className="animate-spin mx-auto h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        İşleniyor...
+                                        <div className="flex text-sm text-gray-600 justify-center">
+                                            <p className="pl-1">Dosya işleniyor...</p>
+                                        </div>
                                     </>
-                                ) : '2. Adım: Verileri İşle ve Dönüştür'}
-                            </button>
-                        </div>
+                                ) : (
+                                    <>
+                                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                        <div className="flex text-sm text-gray-600 justify-center">
+                                            <p className="pl-1">{fileName ? `Seçilen dosya: ${fileName}` : 'Dosya seçmek için tıklayın veya sürükleyip bırakın'}</p>
+                                        </div>
+                                        <p className="text-xs text-gray-500">XLS, XLSX formatında</p>
+                                    </>
+                                )}
+                            </div>
+                        </label>
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".xls,.xlsx" onChange={handleFileChange} disabled={isLoading} />
                         {error && <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-center">{error}</div>}
                     </div>
                     
-                    {/* Adım 3: Sonuçlar ve İndirme */}
+                    {/* Adım 2: Sonuçlar ve İndirme */}
                     {processedData.length > 0 && (
                         <div ref={resultsRef} className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-gray-800">3. Adım: Sonuçları İndirin</h2>
+                                    <h2 className="text-2xl font-bold text-gray-800">2. Adım: Sonuçları İndirin</h2>
                                     <p className="text-gray-600 mt-1">Dönüştürülen veriler aşağıda listelenmiştir. Tam listeyi Excel olarak indirebilirsiniz.</p>
                                 </div>
 
@@ -352,7 +373,7 @@ const App = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {processedData.slice(0, 50).map((row, index) => ( // Önizleme için ilk 50 satırı göster
+                                        {processedData.slice(0, 3).map((row, index) => ( // Önizleme için ilk 3 satırı göster
                                             <tr key={index} className="hover:bg-gray-50 transition-colors">
                                                 {Object.values(row).map((value, i) => (
                                                     <td key={i} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">{value}</td>
@@ -362,7 +383,7 @@ const App = () => {
                                     </tbody>
                                 </table>
                             </div>
-                            {processedData.length > 50 && <p className="text-sm text-center text-gray-500 mt-4">Tabloda ilk 50 satır gösterilmektedir. Tüm veriler Excel dosyasına aktarılacaktır.</p>}
+                            {processedData.length > 3 && <p className="text-sm text-center text-gray-500 mt-4">Tabloda ilk 3 satır gösterilmektedir. Tüm veriler Excel dosyasına aktarılacaktır.</p>}
                         </div>
                     )}
                 </main>
@@ -372,6 +393,4 @@ const App = () => {
 };
 
 export default App;
-
-
 
