@@ -66,9 +66,23 @@ const App = () => {
                         const malzemeAdi = row.malzemeAdi || '';
                         const parts = malzemeAdi.split('-');
 
-                        const isbn = parts.length > 1 ? parts[parts.length - 1].trim() : '';
-                        const eserAdi = parts.length > 2 ? parts[parts.length - 2].trim() : '';
+                        let isbn = '';
+                        let eserAdi = '';
                         
+                        const lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : '';
+                        
+                        // Son kısmın ISBN olup olmadığını kontrol et (10 veya 13 haneli sayı)
+                        const isIsbn = /^\d{10}$|^\d{13}$/.test(lastPart);
+
+                        if (isIsbn) {
+                            isbn = lastPart;
+                            eserAdi = parts.length > 2 ? parts[parts.length - 2].trim() : '';
+                        } else {
+                            // Son kısım ISBN değilse, Eser Adı olarak al
+                            isbn = '';
+                            eserAdi = parts.length > 1 ? parts[parts.length - 1].trim() : malzemeAdi;
+                        }
+
                         const fiyatStr = String(row.birimFiyat || '0').trim().replace(',', '.');
                         const fiyat = parseFloat(fiyatStr);
 
